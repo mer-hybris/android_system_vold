@@ -23,6 +23,8 @@
 #include <android-base/logging.h>
 #include <android-base/properties.h>
 #include <android-base/stringprintf.h>
+#include "fs/Exfat.h"
+
 #include <cutils/fs.h>
 #include <logwrap/logwrap.h>
 #include <private/android_filesystem_config.h>
@@ -535,6 +537,13 @@ bool IsFilesystemSupported(const std::string& fsType) {
         PLOG(ERROR) << "Failed to read supported filesystems";
         return false;
     }
+
+#ifdef CONFIG_EXFAT_DRIVER
+    /* Add exfat if an exfat driver is present */
+    if (supported.find(CONFIG_EXFAT_DRIVER "\n") != std::string::npos)
+        supported.append("nodev\texfat\n");
+#endif
+
     return supported.find(fsType + "\n") != std::string::npos;
 }
 
